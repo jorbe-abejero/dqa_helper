@@ -1,0 +1,323 @@
+import re
+import tkinter as tk
+from tkinter import messagebox
+from tkinter import ttk
+from ttkwidgets.autocomplete import AutocompleteCombobox
+
+def correct_company_format(event=None):
+    text = entry_company.get()
+    corrected_text = ' '.join(word.capitalize() if word.upper() not in ["LP", "LLP", "LTE","CO"] else word.upper() for word in text.split())
+    entry_company.delete(0, tk.END)
+    entry_company.insert(0, corrected_text)
+
+def copy_to_clipboard_company():
+    text = entry_company.get()
+    root.clipboard_clear()
+    root.clipboard_append(text)
+    root.update()  # required on MacOS
+
+# Dictionary to map acronyms to their full forms
+job_acronym_dict = {
+    "Assoc Dir ":"Associate Director ",
+    "CAO": "Chief Administrative Officer",
+    "CAO": "Chief Analytics Officer",
+    "CEO": "Chief Executive Officer",
+    "CDO": "Chief Data Officer",
+    "CFO": "Chief Financial Officer",
+    "Chair": "Chairperson",
+    "CHRO": "Chief Human Resources Officer",
+    "CIO": "Chief Information Officer",
+    "CLO": "Chief Legal Officer",
+    "CMO": "Chief Marketing Officer",
+    "COO": "Chief Operation Officer",
+    "CPO": "Chief People Officer",
+    "CSO": "Chief Security Officer",
+    "CCO": "Chief Compliance Officer",
+    "CTO": "Chief Technology Officer",
+    "Dir": "Director",
+    "ED": "Executive Director",
+    "EVP": "Executive Vice President",
+    "MD": "Managing Director",
+    "MP": "Managing Partner",
+    "Pres": "President",
+    "VP": "Vice President",
+    "AM": "Account Manager",
+    "AM": "Area Manager",
+    "PM": "Project Manager",
+    "Sr Mgr": "Senior Manager",
+    "Asst": "Assistant",
+    "AD": "Assistant Director",
+    "Admin": "Administrator",
+    "ADV": "Advisor",
+    "Acct": "Accounting",
+    "ADV": "Advisor",
+    "Agt": "Agent",
+    "Anlst": "Analyst ",
+    "APR": "Apprentice ",
+    "Assoc": "Associate ",
+    "CHANC": "Chancellor",
+    "Coord": "Coordinator",
+    "CPA": "Certified Public Accountant",
+    "CSM": "Customer Success Manager",
+    "CSR": "Customer Service Representative",
+    "GC": "General Counsel",
+    "Mkg": "Marketing",
+    "Mkt": "Marketing",
+    "Mktg": "Marketing",
+    "Off": "Officer",
+    "OPER": "Operator",
+    "PM": "Product Manager",
+    "PRIN": "Principal",
+    "Prof": "Professor",
+    "Prog": "Programmer",
+    "Rep": "Representative ",
+    "Sales Assoc": "Sales Associate ",
+    "Spec": "Specialist",
+    "Specl": "Specialist",
+    "Sr": "Senior"
+}
+
+def correct_format(event=None):
+    text = entry_text.get().lower()  # Convert input to lowercase
+    
+    # Replace "-" with ", "
+    text = text.replace("-", ", ")
+    
+    # Replace "|" with ", "
+    text = text.replace("|", ", ")
+    
+    # Replace "/" with ", "
+    text = text.replace("/", ", ")
+    
+    corrected_words = []
+    
+    # Split input based on comma followed by space (", ")
+    parts = text.split(", ")
+    
+    for part in parts:
+        # Capitalize each word in the part
+        words = []
+        for word in part.split():
+            if word.upper() in job_acronym_dict:
+                words.append(job_acronym_dict[word.upper()])
+            elif word.lower() in ["and", "of", "the"]:
+                words.append(word.lower())
+            elif word == "&":
+                words.append("and")
+            else:
+                words.append(word.capitalize())
+        corrected_words.append(' '.join(words))
+    
+    corrected_text = ', '.join(corrected_words)
+    entry_result.delete(0, tk.END)
+    entry_result.insert(0, corrected_text)
+
+def copy_to_clipboard():
+    text = entry_result.get()
+    root.clipboard_clear()
+    root.clipboard_append(text)
+    root.update()  # required on MacOS
+
+
+# Sample country formats
+number_formats = {
+    "HK - OGL": "+852 {}{}{}{} {}{}{}{}",
+    "UK Direct - OGL": "+44 {}{} {}{}{}{} {}{}{}{}",
+    "UK Mobile / Jersey - OGL": "+44 {}{}{}{} {}{}{}{}{}{}",
+    "US / BVI / Cayman - OGL": "+1 {}{}{} {}{}{} {}{}{}{}",
+    "US - (sample name)": "{}{}{}.{}{}{}.{}{}{}{}"
+}
+
+def correct_phone_format(widget, result_entry):
+    phone_number = widget.get()
+    country = country_dropdown.get()
+    
+    # Remove all non-digit characters
+    digits_only = re.sub(r'\D', '', phone_number)
+    
+    # Exclude country code from input
+    if digits_only.startswith(number_formats[country][:3]):
+        digits_only = digits_only[len(number_formats[country][:3]):]
+    
+    # Get the country format
+    country_format = number_formats.get(country)
+    
+    if country_format:
+        # Format the phone number
+        formatted_number = country_format.format(*digits_only)
+        result_entry.delete(0, tk.END)
+        result_entry.insert(0, formatted_number)
+    else:
+        result_entry.delete(0, tk.END)
+        result_entry.insert(0, "Select a country")
+
+def copy_to_clipboard_phone(text):
+    root.clipboard_clear()
+    root.clipboard_append(text)
+    root.update()  # required on MacOS
+
+def correct_email_format():
+    text = entry_email.get()
+    corrected_text = text.lower()
+    entry_email.delete(0, tk.END)
+    entry_email.insert(0, corrected_text)
+
+def copy_to_clipboard_email():
+    text = entry_email.get()
+    root.clipboard_clear()
+    root.clipboard_append(text)
+    root.update()  # required on MacOS
+
+def correct_link_format():
+    text = entry_link.get()
+    cleaned_text = text.replace("https://", "").replace("http://", "").replace("www.", "")
+    entry_link.delete(0, tk.END)
+    entry_link.insert(0, cleaned_text)
+
+def copy_to_clipboard_link():
+    text = entry_link.get()
+    root.clipboard_clear()
+    root.clipboard_append(text)
+    root.update()  # required on MacOS
+
+def clear_all_entries():
+    entry_company.delete(0, tk.END)
+    entry_text.delete(0, tk.END)
+    entry_result.delete(0, tk.END)
+    entry_email.delete(0, tk.END)
+    entry_link.delete(0, tk.END)
+    entry_phone1.delete(0, tk.END)
+    entry_phone2.delete(0, tk.END)
+    entry_result_phone1.delete(0, tk.END)
+    entry_result_phone2.delete(0, tk.END)
+
+def copy_bio():
+    text = "Bio"
+    root.clipboard_clear()
+    root.clipboard_append(text)
+    root.update()  # required on MacOS
+
+def copy_website():
+    text = "Website"
+    root.clipboard_clear()
+    root.clipboard_append(text)
+    root.update()  # required on MacOS
+
+def copy_linkedin():
+    text = "LinkedIn"
+    root.clipboard_clear()
+    root.clipboard_append(text)
+    root.update()  # required on MacOS
+
+root = tk.Tk()
+root.title("DQA Helper by DQA Jewel Jade Bartolome")
+
+# Instruction
+label_instruction = tk.Label(root, text="Note: Country code should not be included in the phone number.")
+label_instruction.grid(row=0, column=0, columnspan=5, padx=5, pady=5, sticky="ew")
+
+# Company Section
+label_company = tk.Label(root, text="Company Name:")
+label_company.grid(row=1, column=0, padx=5, pady=5, sticky="w")
+entry_company = tk.Entry(root)
+entry_company.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+entry_company.bind("<Return>", correct_company_format)
+button_correct_company = tk.Button(root, text="✓", command=correct_company_format)
+button_correct_company.grid(row=1, column=2, padx=5, pady=5, sticky="w")
+button_copy_company = tk.Button(root, text="Copy", command=copy_to_clipboard_company)
+button_copy_company.grid(row=1, column=3, padx=5, pady=5, sticky="w")
+
+# Job Title Section
+label_text = tk.Label(root, text="Job Title:")
+label_text.grid(row=3, column=0, padx=5, pady=5, sticky="w")
+entry_text = tk.Entry(root)
+entry_text.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
+entry_text.bind("<Return>", correct_format)
+button_correct = tk.Button(root, text="✓", command=correct_format)
+button_correct.grid(row=3, column=2, padx=5, pady=5, sticky="ew")
+entry_result = tk.Entry(root)
+entry_result.grid(row=3, column=3, padx=5, pady=5, sticky="ew")
+button_copy = tk.Button(root, text="Copy", command=copy_to_clipboard)
+button_copy.grid(row=3, column=4, padx=5, pady=5, sticky="ew")
+
+# Email Section
+label_email = tk.Label(root, text="Email:")
+label_email.grid(row=4, column=0, padx=5, pady=5, sticky="w")
+entry_email = tk.Entry(root)
+entry_email.grid(row=4, column=1, padx=5, pady=5, sticky="ew")
+button_correct_email = tk.Button(root, text="✓", command=correct_email_format)
+button_correct_email.grid(row=4, column=2, padx=5, pady=5, sticky="w")
+button_copy_email = tk.Button(root, text="Copy", command=copy_to_clipboard_email)
+button_copy_email.grid(row=4, column=3, padx=5, pady=5, sticky="w")
+
+# Link Section
+label_link = tk.Label(root, text="Link:")
+label_link.grid(row=5, column=0, padx=5, pady=5, sticky="w")
+entry_link = tk.Entry(root)
+entry_link.grid(row=5, column=1, padx=5, pady=5, sticky="ew")
+button_correct_link = tk.Button(root, text="✓", command=correct_link_format)
+button_correct_link.grid(row=5, column=2, padx=5, pady=5, sticky="w")
+button_copy_link = tk.Button(root, text="Copy", command=copy_to_clipboard_link)
+button_copy_link.grid(row=5, column=3, padx=5, pady=5, sticky="w")
+
+# Country Dropdown
+label_country = tk.Label(root, text="Select Country:")
+label_country.grid(row=6, column=0, padx=5, pady=5, sticky="w")
+country_var = tk.StringVar()
+country_dropdown = AutocompleteCombobox(root, textvariable=country_var, completevalues=list(number_formats.keys()))
+country_dropdown.grid(row=6, column=1, padx=5, pady=5, sticky="ew")
+
+# Phone Number 1 Section
+label_phone1 = tk.Label(root, text="Phone Number 1:")
+label_phone1.grid(row=7, column=0, padx=5, pady=5, sticky="w")
+entry_phone1 = tk.Entry(root)
+entry_phone1.grid(row=7, column=1, padx=5, pady=5, sticky="ew")
+button_correct_phone1 = tk.Button(root, text="✓", command=lambda: correct_phone_format(entry_phone1, entry_result_phone1))
+button_correct_phone1.grid(row=7, column=2, padx=5, pady=5, sticky="w")
+entry_result_phone1 = tk.Entry(root)
+entry_result_phone1.grid(row=7, column=3, padx=5, pady=5, sticky="ew")
+button_copy_phone1 = tk.Button(root, text="Copy", command=lambda: copy_to_clipboard_phone(entry_result_phone1.get()))
+button_copy_phone1.grid(row=7, column=4, padx=5, pady=5, sticky="w")
+
+# Phone Number 2 Section
+label_phone2 = tk.Label(root, text="Phone Number 2:")
+label_phone2.grid(row=8, column=0, padx=5, pady=5, sticky="w")
+entry_phone2 = tk.Entry(root)
+entry_phone2.grid(row=8, column=1, padx=5, pady=5, sticky="ew")
+button_correct_phone2 = tk.Button(root, text="✓", command=lambda: correct_phone_format(entry_phone2, entry_result_phone2))
+button_correct_phone2.grid(row=8, column=2, padx=5, pady=5, sticky="w")
+entry_result_phone2 = tk.Entry(root)
+entry_result_phone2.grid(row=8, column=3, padx=5, pady=5, sticky="ew")
+button_copy_phone2 = tk.Button(root, text="Copy", command=lambda: copy_to_clipboard_phone(entry_result_phone2.get()))
+button_copy_phone2.grid(row=8, column=4, padx=5, pady=5, sticky="w")
+
+bio_text = "Bio"
+website_text = "Website"
+linkedin_text = "LinkedIn"
+
+# Calculate the maximum length among all button texts
+max_length = max(len(bio_text), len(website_text), len(linkedin_text))
+
+# Bio Button
+button_copy_bio = tk.Button(root, text=bio_text, command=copy_bio, width=max_length + 2)
+button_copy_bio.grid(row=9, column=4, padx=5, pady=5, sticky="ew", columnspan=2)
+
+# Website Button
+button_copy_website = tk.Button(root, text=website_text, command=copy_website, width=max_length + 2)
+button_copy_website.grid(row=9, column=2, padx=5, pady=5, sticky="ew", columnspan=2)
+
+# LinkedIn Button
+button_copy_linkedin = tk.Button(root, text=linkedin_text, command=copy_linkedin, width=max_length + 2)
+button_copy_linkedin.grid(row=9, column=0, padx=5, pady=5, sticky="ew", columnspan=2)
+
+# Clear Button
+button_clear = tk.Button(root, text="Clear All", command=clear_all_entries)
+button_clear.grid(row=10, column=0, columnspan=5, padx=5, pady=5, sticky="ew")
+
+# Adjust button and entry sizes to window size
+for i in range(5):
+    root.columnconfigure(i, weight=1)
+for i in range(10):
+    root.rowconfigure(i, weight=1)
+
+root.mainloop()
